@@ -1,0 +1,88 @@
+{
+  "demonstrations": [
+    {
+      "title": "INNER JOIN DEMONSTRATION",
+      "description": "Inner join returns only rows where there is a match in BOTH tables. Users with orders: INCLUDED, Users without orders: EXCLUDED, Orders with invalid user_id: EXCLUDED",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM users u\n    INNER JOIN orders o ON u.id = o.user_id\n    ORDER BY u.name, o.order_date",
+      "result_title": "Users who have placed orders (INNER JOIN)"
+    },
+    {
+      "title": "LEFT JOIN DEMONSTRATION",
+      "description": "Left join returns ALL rows from left table (users), and matched rows from the right table (orders). All users: INCLUDED, Users without orders: order columns will be NULL, Orders with invalid user_id: NOT shown",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    ORDER BY u.name, o.order_date",
+      "result_title": "All users, with their orders if they have any (LEFT JOIN)"
+    },
+    {
+      "title": "LEFT JOIN EXCLUDING NULLS DEMONSTRATION",
+      "description": "Left join with WHERE clause excluding NULL values returns only rows where there's a match in both tables. Users with orders: INCLUDED, Users without orders: EXCLUDED",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    WHERE o.id IS NOT NULL\n    ORDER BY u.name, o.order_date",
+      "result_title": "Users with orders (LEFT JOIN WHERE order_id IS NOT NULL)"
+    },
+    {
+      "title": "RIGHT JOIN DEMONSTRATION",
+      "description": "Right join returns ALL rows from the right table (orders), and matched rows from the left table (users). All orders: INCLUDED, Orders with invalid user_id: user columns will be NULL, Users without orders: NOT shown. Simulated by swapping tables and using LEFT JOIN",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM orders o\n    LEFT JOIN users u ON u.id = o.user_id\n    ORDER BY o.order_date",
+      "result_title": "All orders, with user info if available (RIGHT JOIN - simulated)"
+    },
+    {
+      "title": "FULL OUTER JOIN DEMONSTRATION",
+      "description": "Full outer join returns rows when there is a match in ONE OR BOTH tables. All users: INCLUDED, All orders: INCLUDED, Where there's no match: columns will be NULL. Simulated using UNION of LEFT JOIN results",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    UNION ALL\n    SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        o.id as order_id,\n        o.amount,\n        o.order_date\n    FROM orders o\n    LEFT JOIN users u ON u.id = o.user_id\n    WHERE u.id IS NULL\n    ORDER BY order_date NULLS LAST, name",
+      "result_title": "All users and all orders, regardless of matches (FULL OUTER JOIN - simulated)"
+    },
+    {
+      "title": "SELF JOIN DEMONSTRATION",
+      "description": "Self join joins a table to itself, using table aliases to distinguish between two instances. All employees: INCLUDED, Shows each employee with their manager, Top-level employees have NULL for manager name",
+      "query": "SELECT\n        e1.id as employee_id,\n        e1.name as employee_name,\n        e2.id as manager_id,\n        e2.name as manager_name\n    FROM employees e1\n    LEFT JOIN employees e2 ON e1.manager_id = e2.id\n    ORDER BY e1.id",
+      "result_title": "Employees with their managers (SELF JOIN)"
+    },
+    {
+      "title": "CROSS JOIN DEMONSTRATION",
+      "description": "Cross join returns the Cartesian product of two tables. Every row from first table × every row from second table. Result has M × N rows. No join condition. Can produce very large result sets!",
+      "query": "SELECT\n        u.name as user_name,\n        p.name as product_name,\n        p.price\n    FROM users u\n    CROSS JOIN products p\n    ORDER BY u.name, p.name",
+      "result_title": "All combinations of users × products (CROSS JOIN)"
+    },
+    {
+      "title": "ANTI-JOIN: Users without orders",
+      "description": "Anti-join finds users that don't have matching records in orders table. Uses LEFT JOIN with WHERE clause checking for NULL. Very useful for finding inactive users",
+      "query": "SELECT\n        u.id,\n        u.name,\n        u.email\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    WHERE o.id IS NULL\n    ORDER BY u.name",
+      "result_title": "Users who have NOT placed any orders (ANTI-JOIN)"
+    },
+    {
+      "title": "ANTI-JOIN: Orphan orders",
+      "description": "Anti-join finds orders that don't have matching records in users table. Uses LEFT JOIN with WHERE clause checking for NULL. Very useful for identifying orphan records and data integrity issues",
+      "query": "SELECT\n        o.id,\n        o.amount,\n        o.order_date,\n        o.user_id\n    FROM orders o\n    LEFT JOIN users u ON o.user_id = u.id\n    WHERE u.id IS NULL\n    ORDER BY o.id",
+      "result_title": "Orders with invalid user_id (orphan records)"
+    },
+    {
+      "title": "JOIN WITH AGGREGATION: Order summary",
+      "description": "Join with aggregation combines join operations with GROUP BY and aggregate functions (COUNT, SUM, AVG, MAX, MIN). Shows order statistics per user for reporting and analytics",
+      "query": "SELECT\n        u.id as user_id,\n        u.name,\n        u.email,\n        COUNT(o.id) as total_orders,\n        SUM(o.amount) as total_spent,\n        AVG(o.amount) as avg_order_amount,\n        MAX(o.amount) as largest_order,\n        MIN(o.amount) as smallest_order\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    GROUP BY u.id, u.name, u.email\n    ORDER BY u.name",
+      "result_title": "Order summary per user (JOIN with COUNT, SUM, AVG, MAX, MIN)"
+    },
+    {
+      "title": "JOIN WITH AGGREGATION: Product statistics",
+      "description": "Join with aggregation combines join operations with GROUP BY and COUNT. Shows how many times each product was ordered. Useful for inventory management and sales analysis",
+      "query": "SELECT\n        p.id as product_id,\n        p.name as product_name,\n        p.price,\n        COUNT(o.id) as times_ordered\n    FROM products p\n    LEFT JOIN orders o ON p.id = o.product_id\n    GROUP BY p.id, p.name, p.price\n    ORDER BY times_ordered DESC",
+      "result_title": "Products ordered with frequency (JOIN with COUNT)"
+    },
+    {
+      "title": "MULTIPLE JOINS DEMONSTRATION",
+      "description": "Multiple joins allow you to connect three or more tables in a single query. Each JOIN links another table. Data flows from one table to the next. Common for complex relationships (users → orders → products)",
+      "query": "SELECT\n        u.id as user_id,\n        u.name as user_name,\n        u.email,\n        o.id as order_id,\n        o.amount as order_amount,\n        o.order_date,\n        p.id as product_id,\n        p.name as product_name,\n        p.price as product_price\n    FROM users u\n    LEFT JOIN orders o ON u.id = o.user_id\n    LEFT JOIN products p ON o.product_id = p.id\n    ORDER BY u.name, o.order_date",
+      "result_title": "Users, their orders, and product details (MULTIPLE JOINS)"
+    },
+    {
+      "title": "NON-EQUI JOIN: Greater than comparison",
+      "description": "Non-equi join uses comparison operators other than equality for joining. This example uses > to find orders where order amount exceeds product price. Common use case: Finding profitable orders",
+      "query": "SELECT\n        u.email,\n        o.id as order_id,\n        o.amount as order_amount,\n        p.name as product_name,\n        p.price as product_price\n    FROM users u\n    JOIN orders o ON u.id = o.user_id\n    JOIN products p ON o.product_id = p.id\n    WHERE o.amount > p.price\n    ORDER BY u.name, o.amount DESC",
+      "result_title": "Orders where order amount exceeds product price (non-equi with >)"
+    },
+    {
+      "title": "NON-EQUI JOIN: Range comparison with BETWEEN",
+      "description": "Non-equi join uses comparison operators other than equality for joining. This example uses BETWEEN to find orders with amounts in a specific range (100-250). Common use case: Finding orders in a certain price range",
+      "query": "SELECT\n        u.name as user_name,\n        u.email,\n        o.id as order_id,\n        o.amount as order_amount\n    FROM users u\n    JOIN orders o ON u.id = o.user_id\n    WHERE o.amount BETWEEN 100 AND 250\n    ORDER BY o.amount",
+      "result_title": "Orders with amounts between 100 and 250 (non-equi with BETWEEN)"
+    }
+  ]
+}
